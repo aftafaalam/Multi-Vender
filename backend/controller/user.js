@@ -6,7 +6,7 @@ const LWPError = require("../utils/error");
 const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const { isAuthenticated } = require("../middleware/auth");
-
+const hashPassword = require('../utils/hashPassword')
 const userRouter = express.Router();
 
 userRouter.get(
@@ -46,6 +46,11 @@ userRouter.post(
     // Email validation
     // Check if the email is in a valid format
     // Regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!email.match(emailRegex)) {
+      return next(new LWPError('Please enter valid email address', 401))
+    }
 
     const allUsers = await UserModel.find({ email });
 
@@ -56,7 +61,9 @@ userRouter.post(
       );
     }
 
-    const activationToken = createActivationToken({ name, email, password });
+    const hashedPassword = await hashPassword(password)
+
+    const activationToken = createActivationToken({ name, email, password: hashedPassword });
     const activationUrl = `http://localhost:5173/activation/${activationToken}`;
     await sendMail({
       email: email,
@@ -79,6 +86,12 @@ userRouter.get(
         token,
         process.env.JWT_SECRET
       );
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!email.match(emailRegex)) {
+        return next(new LWPError('Email address is not valid', 401))
+      }
 
       const allUsers = await UserModel.find({ email });
 

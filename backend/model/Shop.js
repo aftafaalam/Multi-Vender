@@ -39,14 +39,6 @@ const shopSchema = new mongoose.Schema({
   },
 });
 
-//  Hash password
-shopSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
-
-  this.password = await bcrypt.hash(this.password, 10);
-});
 
 // jwt token
 shopSchema.methods.getJwtToken = function () {
@@ -55,7 +47,7 @@ shopSchema.methods.getJwtToken = function () {
   });
 };
 
-// // compare password
+//  compare password
 shopSchema.methods.comparePassword = async function (enteredPassword) {
   console.log(enteredPassword, this.password);
   return await bcrypt.compare(enteredPassword, this.password);

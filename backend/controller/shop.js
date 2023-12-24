@@ -6,6 +6,7 @@ const LWPError = require("../utils/error");
 const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const { isSeller } = require("../middleware/auth");
+const hashPassword = require('../utils/hashPassword')
 
 const shopRouter = express.Router();
 
@@ -33,52 +34,81 @@ shopRouter.get(
 shopRouter.post(
   "/create",
   catchAsyncErrors(async (req, res, next) => {
-    const { name, email, password, phoneNumber, address, zipCode } = req.body;
+    try {
+      const { name, email, password, phoneNumber, address, zipCode } = req.body;
 
-    if (!name) {
-      return next(new LWPError("Name cannot be empty", 400));
+      if (!name) {
+        return next(new LWPError("Name cannot be empty", 400));
+      }
+
+      if (!password) {
+        return next(new LWPError("Password cannot be empty", 400));
+      }
+
+      if (!email) {
+        return next(new LWPError("Email cannot be empty", 400));
+      }
+
+      if (!phoneNumber) {
+        return next(new LWPError('phoneNumber cannot be empty', 401))
+      }
+      if (!address) {
+        return next(new LWPError('address cannot be empty', 401))
+      }
+      if (!zipCode) {
+        return next(new LWPError('zipCode cannot be empty', 401))
+      }
+
+      // Email validation
+      // Check if the email is in a valid format
+      // Regex
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!email.match(emailRegex)) {
+        return next(new LWPError('Please enter valid email address', 401))
+      }
+      const allShops = await Shop.find({ email });
+
+      const isEmailExists = allShops.length > 0;
+      if (isEmailExists) {
+        return next(
+          new LWPError("Shop with the provided email already exists", 400)
+        );
+      }
+
+      const hashedPassword = await hashPassword(password)
+
+      const activationToken = createActivationToken({
+        name,
+        email,
+        phoneNumber,
+        address,
+        zipCode,
+        password: hashedPassword
+      });
+
+      const activationUrl = `http://localhost:5173/shop-activation/${activationToken}`;
+      await sendMail({
+        email: email,
+        subject: "Please Activate Your Account",
+        message: `
+        <h2>Hello ${name}</h2>
+        <p>To activate your account click the link below</p>
+        <p>Link is only valid for 5 minutes</p>
+        <a href=${activationUrl} clicktracking=off>${activationUrl}</a>
+    `
+      })
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Shop Activation link sent"
+        });
+
+    } catch (error) {
+      next(new LWPError(error, 500))
     }
-
-    if (!password) {
-      return next(new LWPError("Password cannot be empty", 400));
-    }
-
-    if (!email) {
-      return next(new LWPError("Email cannot be empty", 400));
-    }
-
-    // Email validation
-    // Check if the email is in a valid format
-    // Regex
-
-    const allShops = await Shop.find({ email });
-
-    const isEmailExists = allShops.length > 0;
-    if (isEmailExists) {
-      return next(
-        new LWPError("Shop with the provided email already exists", 400)
-      );
-    }
-
-    const activationToken = createActivationToken({
-      name,
-      email,
-      password,
-      phoneNumber,
-      address,
-      zipCode,
-    });
-    const activationUrl = `http://localhost:5173/shop-activation/${activationToken}`;
-    await sendMail({
-      email: email,
-      subject: "Please Activate Your Account",
-      message: `To activate your account click the link ${activationUrl}`,
-    });
-    res
-      .status(200)
-      .json({ success: true, message: "Shop Activation link sent" });
-  })
-);
+  }));
 
 shopRouter.get(
   "/activation/:token",
@@ -114,7 +144,7 @@ shopRouter.get(
 );
 
 const createActivationToken = (shopData) => {
-  return jwt.sign(shopData, process.env.JWT_SECRET, { expiresIn: "22h" });
+  return jwt.sign(shopData, process.env.JWT_SECRET, { expiresIn: "5m" });
 };
 
 shopRouter.post(

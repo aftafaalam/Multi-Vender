@@ -52,9 +52,11 @@ shopRouter.post(
       if (!phoneNumber) {
         return next(new LWPError('phoneNumber cannot be empty', 401))
       }
+
       if (!address) {
         return next(new LWPError('address cannot be empty', 401))
       }
+
       if (!zipCode) {
         return next(new LWPError('zipCode cannot be empty', 401))
       }

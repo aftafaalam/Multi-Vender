@@ -22,7 +22,7 @@ export const shopLoginAsync = createAsyncThunk(
       return response.data;
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        throw new Error("Login failed: " + error.response?.data.message);
+        throw new Error("Shop Login failed: " + error.response?.data.message);
       } else {
         return Promise.reject();
       }
@@ -40,7 +40,7 @@ export const createShopAsync = createAsyncThunk(
       return response.data;
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        throw new Error("Create failed: " + error.response?.data.message);
+        throw new Error("Shop Create failed: " + error.response?.data.message);
       } else {
         return Promise.reject();
       }
@@ -56,7 +56,7 @@ export const activateShopAsync = createAsyncThunk(
       return response.data;
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        throw new Error("Login failed: " + error.response?.data.message);
+        throw new Error("Shop Activation failed: " + error.response?.data.message);
       } else {
         return Promise.reject();
       }
@@ -74,7 +74,7 @@ export const shopAutoLoginAsync = createAsyncThunk(
       return response.data;
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        throw new Error("Login failed: " + error.response?.data.message);
+        throw new Error("Shop Auto-Login failed: " + error.response?.data.message);
       } else {
         return Promise.reject();
       }

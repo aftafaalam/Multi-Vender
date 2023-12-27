@@ -14,7 +14,7 @@ const ProductDetailsCard: React.FC<ProductDetailsCardProps> = ({
   setOpen,
   product,
 }) => {
-  const cart = undefined;
+  const Cart = undefined;
   const dispatch = useDispatch();
   const [count, setCount] = useState(1);
 

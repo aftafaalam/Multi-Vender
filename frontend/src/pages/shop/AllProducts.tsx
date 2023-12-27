@@ -1,15 +1,19 @@
 import Loader from "../../components/Loader";
 import { useDispatch, useSelector } from "react-redux";
 import ShopHeader from "./Header";
-import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineEye } from "react-icons/ai";
 import ShopSideBar from "./SideBar";
 import { AppDispatch, LWPState } from "../../redux/store";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import { DataGrid, GridColDef } from "@material-ui/data-grid";
-import { deletelProductAsync } from "../../redux/actions/product";
+import {
+  deletelProductAsync,
+  //updateProductAsync,
+} from "../../redux/actions/product";
 
 const ShopAllProducts = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { products, loading } = useSelector((state: LWPState) => state.product);
   const { shop } = useSelector((state: LWPState) => state.shop);
@@ -18,26 +22,26 @@ const ShopAllProducts = () => {
     {
       field: "name",
       headerName: "Name",
-      minWidth: 180,
+      minWidth: 200,
       flex: 1.4,
     },
     {
       field: "price",
       headerName: "Price",
-      minWidth: 120,
+      minWidth: 110,
       flex: 1.4,
     },
     {
       field: "Stock",
       headerName: "Stock",
       type: "number",
-      minWidth: 100,
+      minWidth: 120,
       flex: 1.4,
     },
     {
       field: "Preview",
-      flex: 0.8,
-      minWidth: 180,
+      flex: 1.0,
+      minWidth: 120,
       headerName: "",
       type: "number",
       sortable: false,
@@ -54,8 +58,32 @@ const ShopAllProducts = () => {
       },
     },
     {
+      field: "Edit",
+      flex: 1.0,
+      minWidth: 120,
+      headerName: "",
+      type: "number",
+      sortable: false,
+      renderCell: (params) => {
+        return (
+          <>
+            <Button
+              onClick={() => {
+                console.log("Params :: ", params);
+                navigate("/dashboard-create-product", {
+                  state: products.find((item) => item._id === params.id),
+                });
+              }}
+            >
+              <AiOutlineEdit size={20} />
+            </Button>
+          </>
+        );
+      },
+    },
+    {
       field: "Delete",
-      flex: 0.8,
+      flex: 1.0,
       minWidth: 120,
       headerName: "",
       type: "number",
@@ -95,7 +123,7 @@ const ShopAllProducts = () => {
                     id: product._id!,
                     name: product.name,
                     price: "US$ " + product.discountPrice,
-                    Stock: product.stock,
+                    stock: product.stock,
                   }))}
                 columns={columns}
                 pageSize={100}

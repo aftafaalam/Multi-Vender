@@ -4,6 +4,8 @@ import {
   createProductAsync,
   deletelProductAsync,
   getAllProductAsync,
+  updateProductAsync,
+  //updateProductAsync,
 } from "../actions/product";
 
 interface ProductState {
@@ -36,6 +38,26 @@ const productSlice = createSlice({
         state.products = updatedProductList;
       })
       .addCase(createProductAsync.rejected, (state, action) => {
+        state.loading = "failed";
+        state.error = action.error.message || "An error occurred";
+        throw action.error;
+      })
+      .addCase(updateProductAsync.pending, (state) => {
+        state.loading = "pending";
+        state.error = null;
+      })
+      .addCase(updateProductAsync.fulfilled, (state, action) => {
+        state.loading = "succeeded";
+        state.error = null;
+
+        state.products = state.products.map((product) => {
+          if (product._id === action.payload._id) {
+            return { ...action.payload, shopId: product.shopId };
+          }
+          return product;
+        });
+      })
+      .addCase(updateProductAsync.rejected, (state, action) => {
         state.loading = "failed";
         state.error = action.error.message || "An error occurred";
         throw action.error;

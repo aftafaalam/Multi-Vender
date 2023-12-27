@@ -81,4 +81,29 @@ productRouter.delete(
   })
 );
 
+productRouter.put(
+  "/:id",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const product = await Product.findOne({ _id: req.params.id });
+
+      if (!product) {
+        return next(new LWPError("Product is not found with this id", 404));
+      }
+
+      const updatedData = req.body;
+
+      await Product.updateOne({ _id: req.params.id }, { $set: { ...updatedData } })
+
+      res.status(201).json({
+        success: true,
+        message: "Product Updated successfully!",
+      });
+    } catch (error) {
+      return next(new LWPError(error, 400));
+    }
+  })
+);
+
 module.exports = productRouter;

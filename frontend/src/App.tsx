@@ -16,6 +16,7 @@ import NotFound from "./components/NotFound";
 import ShopAllProducts from "./pages/shop/AllProducts";
 import ProductDetails from "./pages/product/ProductDetail";
 import Products from "./pages/product/Product";
+import TestSocket from "./pages/TestSocket";
 
 function App() {
   return (
@@ -33,6 +34,11 @@ function App() {
         />
         <Route path="/products" element={<Products />} />
         <Route path="/product/:id" element={<ProductDetails />} />
+
+        <Route path="/test-socket" element={<TestSocket />} />
+
+        {/* <Route path="/order" element={<Orders />} /> */}
+
         <Route
           path="/shop-dashboard"
           element={

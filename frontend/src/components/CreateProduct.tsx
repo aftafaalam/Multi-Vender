@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { categoriesData } from "../static/data";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
-import { createProductAsync } from "../redux/actions/product";
+import {
+  createProductAsync,
+  updateProductAsync,
+} from "../redux/actions/product";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
+import { Product } from "../type/product";
 
 const CreateProduct = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const loacation = useLocation();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -19,21 +24,50 @@ const CreateProduct = () => {
   const [discountPrice, setDiscountPrice] = useState(0);
   const [stock, setStock] = useState(0);
 
+  useEffect(() => {
+    const data: Product = loacation.state;
+    if (data) {
+      setName(data.name);
+      setDescription(data.description);
+      setStock(data.stock);
+      setCategory(data.category);
+      setOriginalPrice(data.originalPrice);
+      setDiscountPrice(data.discountPrice || 0);
+      setTags(data.tags || "");
+    }
+  }, [loacation.state]);
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
-      await dispatch(
-        createProductAsync({
-          name,
-          description,
-          category,
-          tags,
-          originalPrice,
-          discountPrice,
-          stock,
-        })
-      );
-      toast.success("Product create Success!");
+      if (loacation.state) {
+        await dispatch(
+          updateProductAsync({
+            _id: loacation.state._id!,
+            name,
+            description,
+            category,
+            tags,
+            originalPrice,
+            discountPrice,
+            stock,
+          })
+        );
+        toast.success("Product Update Success!");
+      } else {
+        await dispatch(
+          createProductAsync({
+            name,
+            description,
+            category,
+            tags,
+            originalPrice,
+            discountPrice,
+            stock,
+          })
+        );
+        toast.success("Product create Success!");
+      }
       navigate("/shop-products");
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -151,7 +185,7 @@ const CreateProduct = () => {
           <div>
             <input
               type="submit"
-              value="Create"
+              value={loacation.state ? "Update" : "Create"}
               className="mt-2 cursor-pointer appearance-none text-center block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>

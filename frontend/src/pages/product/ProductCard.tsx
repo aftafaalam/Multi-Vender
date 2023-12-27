@@ -5,6 +5,9 @@ import { toast } from "react-toastify";
 import lwpStyles from "../../styles";
 import ProductDetailsCard from "./ProductDetailsCard";
 import { Product } from "../../type/product";
+import { addToCart } from "../../redux/reducers/user";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, LWPState } from "../../redux/store";
 
 interface ProductCardProps {
   product: Product;
@@ -12,9 +15,22 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [open, setOpen] = useState(false);
+  const { cart } = useSelector((state: LWPState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
 
   const addToCartHandler = (id: string) => {
-    //
+    const isItemExists = cart.find((i) => i._id === id);
+    if (isItemExists) {
+      toast.error("Item Already in cart");
+    } else {
+      if (product.stock < 1) {
+        toast.error("Product Irem Limited");
+      } else {
+        const cartData = { ...product, quantity: 1 };
+        dispatch(addToCart(cartData));
+        toast.success("Item added to cart successfully");
+      }
+    }
   };
 
   return (

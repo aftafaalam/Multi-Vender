@@ -5,12 +5,13 @@ import { AxiosError } from "axios";
 interface LoginData {
   name?: string;
   email: string;
+  phoneNumber?: string;
   password: string;
   rememberMe?: boolean;
 }
 
 export const loginAsync = createAsyncThunk(
-  "user/login",
+  "user/login", // name of the action
   async (loginData: LoginData) => {
     try {
       const response = await lwpAxios.post("/user/login", loginData, {
@@ -27,23 +28,20 @@ export const loginAsync = createAsyncThunk(
   }
 );
 
-export const autoLoginAsync = createAsyncThunk(
-  "user/autoLogin",
-  async () => {
-    try {
-      const response = await lwpAxios.get("/user", {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        throw new Error("Login failed: " + error.response?.data.message);
-      } else {
-        return Promise.reject();
-      }
+export const autoLoginAsync = createAsyncThunk("user/autoLogin", async () => {
+  try {
+    const response = await lwpAxios.get("/user", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      throw new Error("Login failed: " + error.response?.data.message);
+    } else {
+      return Promise.reject();
     }
   }
-);
+});
 
 export const createUserAsync = createAsyncThunk(
   "user/create",

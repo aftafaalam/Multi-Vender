@@ -4,18 +4,18 @@ import { IoBagHandleOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import lwpStyles from "../styles";
+import { AppDispatch, LWPState } from "../redux/store";
+import CartCard from "./CartCard";
 import { CartProduct } from "../type/product";
 import { addToCart, removeFromCart } from "../redux/reducers/user";
-import CartCard from "./CartCard";
-import { AppDispatch, LWPState } from "../redux/store";
 
 interface CartProps {
   setOpenCart: (val: boolean) => void;
 }
 
 const Cart: React.FC<CartProps> = ({ setOpenCart }) => {
-  const { cart } = useSelector((state: LWPState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
+  const { cart } = useSelector((state: LWPState) => state.user);
 
   const removeFromCartHandler = (data: CartProduct) => {
     dispatch(removeFromCart(data._id));

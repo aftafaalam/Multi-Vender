@@ -62,23 +62,3 @@ export const deletelProductAsync = createAsyncThunk(
     }
   }
 );
-
-export const updateProductAsync = createAsyncThunk(
-  "product/update",
-  async (data: Product) => {
-    try {
-      await lwpAxios.put(`/product/${data._id}`, data, {
-        withCredentials: true,
-      });
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        throw new Error(
-          "Delete Product failed: " + error.response?.data.message
-        );
-      } else {
-        return Promise.reject();
-      }
-    }
-  }
-);

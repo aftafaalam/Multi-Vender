@@ -1,20 +1,16 @@
-import { useEffect, useState } from "react";
-import { categoriesData } from "../static/data";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
-import {
-  createProductAsync,
-  updateProductAsync,
-} from "../redux/actions/product";
+import { useState } from "react";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 import { toast } from "react-toastify";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
-import { Product } from "../type/product";
+import { useDispatch } from "react-redux";
+import { categoriesData } from "../static/data";
+import { AppDispatch } from "../redux/store";
+import { createProductAsync } from "../redux/actions/product";
 
 const CreateProduct = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const loacation = useLocation();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -23,56 +19,46 @@ const CreateProduct = () => {
   const [originalPrice, setOriginalPrice] = useState(0);
   const [discountPrice, setDiscountPrice] = useState(0);
   const [stock, setStock] = useState(0);
-
-  useEffect(() => {
-    const data: Product = loacation.state;
-    if (data) {
-      setName(data.name);
-      setDescription(data.description);
-      setStock(data.stock);
-      setCategory(data.category);
-      setOriginalPrice(data.originalPrice);
-      setDiscountPrice(data.discountPrice || 0);
-      setTags(data.tags || "");
-    }
-  }, [loacation.state]);
+  const [images, setImages] = useState<Array<string | ArrayBuffer>>([]);
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
-      if (loacation.state) {
-        await dispatch(
-          updateProductAsync({
-            _id: loacation.state._id!,
-            name,
-            description,
-            category,
-            tags,
-            originalPrice,
-            discountPrice,
-            stock,
-          })
-        );
-        toast.success("Product Update Success!");
-      } else {
-        await dispatch(
-          createProductAsync({
-            name,
-            description,
-            category,
-            tags,
-            originalPrice,
-            discountPrice,
-            stock,
-          })
-        );
-        toast.success("Product create Success!");
-      }
+      await dispatch(
+        createProductAsync({
+          name,
+          description,
+          category,
+          tags,
+          originalPrice,
+          discountPrice,
+          stock,
+          images
+        })
+      );
+      toast.success("Product create Success!");
       navigate("/shop-products");
     } catch (error) {
       const axiosError = error as AxiosError;
       toast.error(axiosError.message || "An error occurred");
     }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    setImages([]);
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (reader.readyState === 2) {
+          setImages((old) => [...old, reader.result!]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
@@ -181,11 +167,37 @@ const CreateProduct = () => {
           />
         </div>
         <br />
+
         <div>
+          <label className="pb-2">
+            Upload Images <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="file"
+            name=""
+            id="upload"
+            className="hidden"
+            multiple
+            onChange={handleImageChange}
+          />
+          <div className="w-full flex items-center flex-wrap">
+            <label htmlFor="upload">
+              <AiOutlinePlusCircle size={30} className="mt-3" color="#555" />
+            </label>
+            {images &&
+              images.map((i) => (
+                <img
+                  src={i?.toString()}
+                  key={i?.toString()}
+                  alt=""
+                  className="h-[120px] w-[120px] object-cover m-2"
+                />
+              ))}
+          </div>
           <div>
             <input
               type="submit"
-              value={loacation.state ? "Update" : "Create"}
+              value="Create"
               className="mt-2 cursor-pointer appearance-none text-center block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>

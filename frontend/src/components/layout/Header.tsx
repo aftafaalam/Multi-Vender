@@ -21,14 +21,14 @@ const Header: React.FC<HeaderProp> = ({ activeHeading }) => {
   const { isAuthenticated, cart } = useSelector(
     (state: LWPState) => state.user
   );
-  const isSeller = true;
-  const [searchTerm, setSearchTerm] = useState("");
+  const isSeller = useSelector((state: LWPState) => state.shop.isAuthenticated);
+  const [searchTerm] = useState("");
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const handleSearchChange = (e) => {};
+  const handleSearchChange = () => {};
 
   window.addEventListener("scroll", () => {
     if (window.scrollY > 70) {
@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProp> = ({ activeHeading }) => {
           </div>
 
           <div className={`${lwpStyles.button}`}>
-            <Link to={`${isSeller ? "/shop-dashboard" : "/shop-create"}`}>
+            <Link to={`${isSeller ? "/shop-dashboard" : "/shop-register"}`}>
               <h1 className="text-[#fff] flex items-center">
                 {isSeller ? "Go Dashboard" : "Become Seller"}{" "}
                 <IoIosArrowForward className="ml-1" />
@@ -114,11 +114,9 @@ const Header: React.FC<HeaderProp> = ({ activeHeading }) => {
                   size={30}
                   color="rgb(255 255 255 / 83%)"
                 />
-                {cart.length > 0 && (
-                  <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-                    {cart.length}
-                  </span>
-                )}
+                {cart.length > 0 && <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
+                  {cart.length}
+                </span>}
               </div>
             </div>
 
@@ -165,7 +163,7 @@ const Header: React.FC<HeaderProp> = ({ activeHeading }) => {
             >
               <AiOutlineShoppingCart size={30} />
               <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-                1
+                {cart.length > 0 ? "" : cart.length}
               </span>
             </div>
           </div>
@@ -196,7 +194,7 @@ const Header: React.FC<HeaderProp> = ({ activeHeading }) => {
 
               <Navbar active={activeHeading} />
               <div className={`${lwpStyles.button} ml-4 !rounded-[4px]`}>
-                <Link to="/shop-create">
+                <Link to="/shop-register">
                   <h1 className="text-[#fff] flex items-center">
                     Become Seller <IoIosArrowForward className="ml-1" />
                   </h1>

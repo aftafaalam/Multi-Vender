@@ -1,6 +1,13 @@
-import { io } from "socket.io-client";
+import { Socket, io } from "socket.io-client";
 
-const URL = `http://localhost:8080`;
+interface ServerToClientEvents {
+    testSocket: (a: number, b: string) => void;
+  }
+  
+  interface ClientToServerEvents {
+    testSocket: (a:string) => void;
+  }
 
-export const socket = io(URL, {autoConnect:false});
+const URL = "http://localhost:8080";
 
+export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(URL, { autoConnect: false });

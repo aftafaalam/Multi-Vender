@@ -21,7 +21,7 @@ const initialState: UserState = {
   isAuthenticated: false,
   error: null,
   user: null,
-  cart: [],
+  cart: JSON.parse(localStorage.getItem("user_cart") || "[]"),
 };
 
 const userSlice = createSlice({
@@ -29,27 +29,28 @@ const userSlice = createSlice({
   initialState: initialState,
   reducers: {
     addToCart: (state, action) => {
-      const CartProduct: CartProduct = action.payload;
+      const cartProduct: CartProduct = action.payload;
 
-      const isItemExist = state.cart.find((i) => i._id === CartProduct._id);
+      const isItemExist = state.cart.find((i) => i._id === cartProduct._id);
       if (isItemExist) {
-        return {
-          ...state,
-          cart: state.cart.map((existingCartProduct) =>
-            existingCartProduct._id === isItemExist._id
-              ? CartProduct
-              : existingCartProduct
-          ),
-        };
+        state.cart = state.cart.map((existingCartProduct) =>
+          existingCartProduct._id === isItemExist._id
+            ? cartProduct
+            : existingCartProduct
+        );
       } else {
-        return {
-          ...state,
-          cart: [...state.cart, CartProduct],
-        };
+        state.cart = [...state.cart, cartProduct];
       }
+
+      localStorage.setItem("user_cart", JSON.stringify(state.cart));
     },
     removeFromCart: (state, action) => {
       state.cart = state.cart.filter((i) => i._id !== action.payload);
+      localStorage.setItem("user_cart", JSON.stringify(state.cart));
+    },
+    emptyCart: (state) => {
+      state.cart = [];
+      localStorage.setItem("user_cart", JSON.stringify(state.cart));
     },
   },
   extraReducers: (builder) => {
@@ -94,14 +95,22 @@ const userSlice = createSlice({
         state.error = action.error.message || "An error occurred";
         throw action.error;
       })
+      .addCase(autoLoginAsync.pending, (state) => {
+        state.loading = "pending";
+        state.error = null;
+      })
       .addCase(autoLoginAsync.fulfilled, (state, action) => {
         state.loading = "succeeded";
         state.isAuthenticated = true;
         state.user = action.payload.user;
+      })
+      .addCase(autoLoginAsync.rejected, (state, action) => {
+        state.loading = "failed";
+        state.error = action.error.message || "An error occurred";
       });
   },
 });
 
-export const { addToCart, removeFromCart } = userSlice.actions;
+export const { addToCart, removeFromCart, emptyCart } = userSlice.actions;
 
 export default userSlice;

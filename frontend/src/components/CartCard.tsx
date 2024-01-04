@@ -22,7 +22,7 @@ const CartCard: React.FC<CartCardProps> = ({
     (product.discountPrice || product.originalPrice) * quantity;
 
   const increment = () => {
-    if (product.stock < quantity) {
+    if (product.stock <= quantity) {
       toast.error("Product stock limited!");
     } else {
       setQuantity(quantity + 1);
@@ -61,7 +61,7 @@ const CartCard: React.FC<CartCardProps> = ({
         <div className="pl-[5px]">
           <h1>{product.name}</h1>
           <h4 className="font-[400] text-[15px] text-[#00000082]">
-            ${product.discountPrice} * {quantity}
+            ${product.discountPrice || product.originalPrice} * {quantity}
           </h4>
           <h4 className="font-[600] text-[17px] pt-[3px] text-[#d02222] font-Roboto">
             US${totalPrice}
